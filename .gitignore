@@ -13,3 +13,5 @@ env/
 *.egg-info/
 dist/
 build/
+.idea
+.pytest_cache
