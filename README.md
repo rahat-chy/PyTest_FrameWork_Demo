@@ -53,6 +53,24 @@ PyTest_Framework_Demo/
 
 ├── tests/
 
+│ ├── apis
+
+│ | ├── base_api.py
+
+│ | ├── post_api.py
+
+│ ├── fixtures
+
+│ | ├── calculator_fixtures.py
+
+│ | ├── library_fixtures.py
+
+│ | ├── payload_fixtures.py
+
+│ ├── utils
+
+│ | ├── assertions.py
+
 │ ├── conftest.py
 
 │ ├── test_api.py
@@ -70,11 +88,11 @@ PyTest_Framework_Demo/
 **Explanation:**
 
 - src/ – Contains the core modules (Calculator, Library, Transactions).
-- tests/ – Contains test files categorized by module or API.
+- tests/ – Contains test, fixtures and test util files categorized by module or API.
 - pytest.ini – Central pytest configuration, including markers and default options.
 - conftest.py – Contains fixtures shared across multiple tests
 
-**5\. Fixtures**
+**5\. Fixtures and Helper Methods**
 
 - **calc** – Returns a Calculator instance for arithmetic tests.
 - **sample_user** – Returns a User instance with default balance and a LibraryAccount.
@@ -85,16 +103,16 @@ PyTest_Framework_Demo/
   - Alice (already borrowed "Python 101")
   - Bob (starts with no books)
 - **base_url** – Base URL for all API tests.
-- **specific_post_endpoint** – Returns the endpoint for a specific post (or all posts if no ID provided).
-- **multiple_posts_endpoint** – Returns the endpoint for fetching multiple posts.
+- **get_post** – Returns the endpoint for a specific post.
+- **list_posts** – Returns the endpoint for fetching multiple posts.
 - **post_payload** – Sample payload for POST requests.
 - **put_payload** – Sample payload for PUT requests.
 - **patch_payload** – Sample payload for PATCH requests.
 - **get_request / post_request / put_request / patch_request / delete_request** – Wrappers around requests methods for reusable HTTP actions.
-- **assert_status_code** – Helper to assert the expected HTTP status code.
-- **assert_post_fields** – Helper to assert that a single API post contains the required fields (id, userId, title, body).
-- **assert_post_list_fields** – Helper to assert that a list of posts contains the required fields, validating multiple entries.
-- **assert_payload_matches** – Helper to assert that a payload matches the API response, with optional keys to exclude.
+- **AssertData.status_code** – Helper to assert the expected HTTP status code.
+- **AssertData.has_post_fields** – Helper to assert that a single API post contains the required fields (id, userId, title, body).
+- **AssertData.has_post_list_fields** – Helper to assert that a list of posts contains the required fields, validating multiple entries.
+- **AssertData.payload_matches** – Helper to assert that a payload matches the API response, with optional keys to exclude.
 
 **Benefits:**
 
