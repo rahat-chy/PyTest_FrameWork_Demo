@@ -9,11 +9,14 @@ class User:
         self.calculator = Calculator()
 
     def add_funds(self, amount):
-        if amount <= 0:
+        if amount < 0:
             raise ValueError("Deposit must be positive")
         self.balance = self.calculator.add(self.balance, amount)
 
     def pay_fee(self, amount):
         if amount > self.balance:
             raise ValueError("Insufficient funds")
+        elif amount < 0:
+            raise ValueError("Fee must be positive")
+
         self.balance = self.calculator.subtract(self.balance, amount)

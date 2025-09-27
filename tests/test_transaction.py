@@ -1,5 +1,6 @@
 import pytest
 from src.transactions import Transaction
+from src.library import Book
 
 
 # --------------------------
@@ -37,6 +38,7 @@ class TestTransactionIntegration:
             assert sample_user.balance == starting_balance + 50
             assert f"{50} added to {sample_user.username}" in msg
 
+
     @pytest.mark.regression
     class TestTransactionIntegrationRegression:
 
@@ -50,6 +52,7 @@ class TestTransactionIntegration:
             [
                 ([("Book 1", "Author 1", 2), ("Book 2", "Author 2", 1)], [10, 15], 75),
                 ([("Book A", "Author A", 1)], [5], 95),
+                ([("Book A", "Author A", 1)], [0], 100),
                 ([("Book X", "Author X", 3), ("Book Y", "Author Y", 2)], [20, 10], 70),
             ],
         )
@@ -65,6 +68,29 @@ class TestTransactionIntegration:
                 txn.charge_late_fee(fee)
 
             assert sample_user.balance == expected_balance
+
+
+        #Failing when applying negative fee or fee that is greater than tha balance
+        @pytest.mark.parametrize(
+            "book_specs, fees",
+            [
+                (("Book A", "Author A", 1), -5),
+                (("Book A", "Author A", 1), 101),
+            ],
+        )
+        def test_multiple_books_and_fees_cases(
+                self, sample_user, book_specs, fees
+        ):
+            book = Book(*book_specs)
+
+            sample_user.account.borrow_book(book)
+
+            txn = Transaction(sample_user)
+
+            with pytest.raises(ValueError):
+                txn.charge_late_fee(fees)
+
+
 
         # edge case: borrowing same book twice
         @pytest.mark.parametrize(
@@ -84,6 +110,8 @@ class TestTransactionIntegration:
             with pytest.raises(ValueError):
                 sample_user.account.borrow_book(book)
 
+
+
         # edge case: returning a book never borrowed
         @pytest.mark.parametrize(
             "title, author, copies",
@@ -101,17 +129,31 @@ class TestTransactionIntegration:
             with pytest.raises(ValueError):
                 sample_user.account.return_book(book)
 
+
+
         # --------------------------
         # New add_funds tests
         # --------------------------
 
         # multiple additions = edge case
-        def test_transaction_add_funds_multiple_times(self, sample_user):
+        @pytest.mark.parametrize(
+            "funds, exptected_balance",
+            [
+                ([30,20], 150),
+                ([0], 100),
+                ([10,0,5], 115)
+            ],
+        )
+        def test_transaction_add_funds_multiple_times(self, sample_user, funds, exptected_balance):
             txn = Transaction(sample_user)
             starting_balance = sample_user.balance
-            txn.add_funds(30)
-            txn.add_funds(20)
-            assert sample_user.balance == starting_balance + 50
+
+            for fund in funds:
+                txn.add_funds(fund)
+
+
+            assert sample_user.balance == exptected_balance
+
 
         # negative scenario: invalid amount
         def test_transaction_add_funds_negative_amount(self, sample_user):
@@ -137,12 +179,15 @@ class TestTransactionStandAlone:
             assert sample_book in sample_user.account.borrowed_books
             assert sample_book.copies == 1
 
+
         # critical path: return a borrowed book
         def test_user_return_book(self, sample_user, sample_book):
             sample_user.account.borrow_book(sample_book)
             sample_user.account.return_book(sample_book)
             assert sample_book not in sample_user.account.borrowed_books
             assert sample_book.copies == 2
+
+
 
     @pytest.mark.regression
     class TestTransactionStandAloneRegression:
@@ -163,6 +208,7 @@ class TestTransactionStandAlone:
 
             with pytest.raises(ValueError):
                 sample_user.account.borrow_book(book)
+
 
         # negative case: returning a book not borrowed
         @pytest.mark.parametrize(

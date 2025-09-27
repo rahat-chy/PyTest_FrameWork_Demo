@@ -33,10 +33,20 @@ class TestUserRegression:
         with pytest.raises(ValueError):
             sample_user.add_funds(-10)
 
-    # negative case: insufficient balance
-    def test_pay_fee_insufficient(self, sample_user):
+
+    # negative case: insufficient balance or negative fee
+    @pytest.mark.parametrize(
+        "fee",
+        [
+            (1000),
+            (-10)
+        ],
+    )
+    def test_pay_fee_insufficient_or_negative(self, sample_user, fee):
         with pytest.raises(ValueError):
-            sample_user.pay_fee(1000)
+            sample_user.pay_fee(fee)
+
+
 
     # --------------------------
     # Additional edge / regression tests
@@ -44,9 +54,10 @@ class TestUserRegression:
 
 
     def test_add_funds_zero(self, sample_user):
-        """Adding 0 funds should raise ValueError"""
-        with pytest.raises(ValueError, match="Deposit must be positive"):
-            sample_user.add_funds(0)
+        """Adding 0 funds should not raise ValueError"""
+        sample_user.add_funds(0)
+
+        assert sample_user.balance == 100
 
 
     def test_pay_fee_exact_balance(self, sample_user):

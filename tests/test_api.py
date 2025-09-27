@@ -64,6 +64,11 @@ class TestAPIRegression:
         response = posts_api.get("/nonexistent")
         AssertData.status_code(response, 404)
 
-    def test_handle_invalid_post_id(self, posts_api):
-        response = posts_api.get_post(999999)
+    def test_handle_valid_endpoint_with_multiple_forward_slashes(self, posts_api):
+        response = posts_api.get("/////")
+        AssertData.status_code(response, 200)
+
+    @pytest.mark.parametrize("post_id", [999999, -10, 0, -99999])
+    def test_handle_invalid_post_id(self, posts_api, post_id):
+        response = posts_api.get_post(post_id)
         AssertData.status_code(response, 404)
